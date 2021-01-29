@@ -1,0 +1,6 @@
+reva2_jsonapi:
+  cache_adapter: void
+  schemas:
+    App\Dto\PostDto: App\Schema\PostSchema
+    App\Dto\UserDto: App\Schema\UserSchema
+    App\Dto\ContentDto: App\Schema\ContentSchema
