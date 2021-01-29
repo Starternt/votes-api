@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+test $CONSUL_HTTP_ADDR || CONSUL_HTTP_ADDR=localhost:8500
+
+echo "Generate consul-template configuration file"
+envsubst < /etc/consul-template/conf.hcl.tpl > /etc/consul-template/conf.hcl
+
+echo "Generate application configuration files"
+consul-template -config /etc/consul-template/conf.hcl -once
+
+echo "Create database and apply migrations"
+/var/www/html/bin/console doctrine:database:create --if-not-exists -vvv
+/var/www/html/bin/console doctrine:migrations:migrate -vvv --no-interaction
+
+chown -R www-data:www-data /var/www/html/var/
+
+exec "$@"
