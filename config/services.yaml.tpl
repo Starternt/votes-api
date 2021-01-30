@@ -23,7 +23,7 @@ services:
 
     app.gelf_formatter:
         class: 'Monolog\Formatter\GelfMessageFormatter'
-        arguments: ['loyalty-system-api']
+        arguments: ['votes-api']
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class

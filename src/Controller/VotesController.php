@@ -65,6 +65,7 @@ class VotesController extends JsonApiController
      */
     public function create(Request $request): Response
     {
+        dump(32); exit();
         $apiRequest = $this->jsonApiService->parseRequest($request);
 
         /* @var $vote VoteDto */
