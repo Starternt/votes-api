@@ -3,4 +3,4 @@ reva2_jsonapi:
   schemas:
     App\Dto\PostDto: App\Schema\PostSchema
     App\Dto\UserDto: App\Schema\UserSchema
-    App\Dto\ContentDto: App\Schema\ContentSchema
+    App\Dto\VoteDto: App\Schema\VoteSchema

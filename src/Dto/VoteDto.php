@@ -38,7 +38,7 @@ class VoteDto
 
     /**
      * @var boolean
-     * @Assert\NotBlank()
+     * @Assert\NotNull()
      * @Attribute()
      */
     protected $isNegative = false;
@@ -93,11 +93,11 @@ class VoteDto
     }
 
     /**
-     * @param string $post
+     * @param PostDto $post
      *
      * @return VoteDto
      */
-    public function setPost(string $post): VoteDto
+    public function setPost(PostDto $post): VoteDto
     {
         $this->post = $post;
 
@@ -125,9 +125,9 @@ class VoteDto
     }
 
     /**
-     * @return UserDto
+     * @return UserDto|null
      */
-    public function getCreatedBy(): UserDto
+    public function getCreatedBy(): ?UserDto
     {
         return $this->createdBy;
     }

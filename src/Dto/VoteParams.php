@@ -18,7 +18,10 @@ class VoteParams extends QueryParameters
      */
     protected function getAllowedIncludePaths()
     {
-        return [];
+        return [
+            'post',
+            'createdBy',
+        ];
     }
 
     /**
@@ -28,7 +31,10 @@ class VoteParams extends QueryParameters
     {
         switch ($resource) {
             case 'votes':
-                return [];
+                return [
+                    'id',
+                    'isNegative'
+                ];
 
             default:
                 return parent::getFieldSets();

@@ -30,3 +30,6 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
+    App\Utils\DataMappers\VotesMapper:
+        arguments:

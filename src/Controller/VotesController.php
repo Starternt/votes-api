@@ -65,13 +65,12 @@ class VotesController extends JsonApiController
      */
     public function create(Request $request): Response
     {
-        dump(32); exit();
         $apiRequest = $this->jsonApiService->parseRequest($request);
 
-        /* @var $vote VoteDto */
-        $vote = $apiRequest->getBody()->data;
+        /* @var $voteDto VoteDto */
+        $voteDto = $apiRequest->getBody()->data;
 
-        $voteDto = $this->service->create($vote);
+        $voteDto = $this->service->create($voteDto);
 
         return $this->buildContentResponse($apiRequest, $voteDto);
     }

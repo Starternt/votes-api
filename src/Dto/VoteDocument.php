@@ -18,7 +18,7 @@ class VoteDocument
 {
     /**
      * @var VoteDto
-     * @Content(type="App\Dto\VoteDto"
+     * @Content(type="App\Dto\VoteDto")
      * @Assert\NotBlank()
      * @Assert\Valid()
      */

@@ -39,6 +39,10 @@ class VotesService
      */
     protected $logger;
 
+    /**
+     * @var VotesMapper
+     */
+    protected $mapper;
 
     /**
      * Constructor
@@ -51,11 +55,13 @@ class VotesService
     public function __construct(
         EntityManagerInterface $em,
         EventDispatcherInterface $dispatcher,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        VotesMapper $mapper
     ) {
         $this->em = $em;
         $this->dispatcher = $dispatcher;
         $this->logger = $logger;
+        $this->mapper = $mapper;
     }
 
     /**
