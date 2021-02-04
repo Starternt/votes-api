@@ -11,9 +11,7 @@ parameters:
     {{ range $idx, $node := service (printf "%s.kafka" $cluster)}}
     kafka.host: '{{ $node.Address }}'
     kafka.port: {{ $node.Port }}{{end}}
-    {{range $idx, $node := service (printf "%s.mysql" $cluster) }}{{ if eq $idx 0 }}
-    host: '{{ $node.Address }}'
-    port: {{ $node.Port }}{{ end }}{{ end }}
+
 services:
     # default configuration for services in *this* file
     _defaults:
