@@ -6,6 +6,7 @@ use App\Dto\UserDto;
 use App\Dto\VoteDto;
 use App\Entity\Vote;
 use App\Utils\DataMappers\VotesMapper;
+use App\Utils\KafkaHelper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
@@ -26,6 +27,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
  */
 class VotesService
 {
+    use KafkaHelper;
+
     /**
      * Entity manager interface
      *
@@ -119,14 +122,7 @@ class VotesService
     public function create(VoteDto $voteDto): VoteDto
     {
         try {
-            $config = ProducerConfig::getInstance();
-            $config->setMetadataRefreshIntervalMs(100000);
-            $config->setMetadataBrokerList($this->kafkaHost.':'.$this->kafkaPort);
-            $config->setBrokerVersion('1.0.0');
-            $config->setRequiredAck(1);
-
-            $config->setIsAsyn(false);
-            $producer = new Producer();
+            $producer = $this->configureProducer($this->kafkaHost, $this->kafkaPort);
 
             $this->em->beginTransaction();
 
@@ -149,7 +145,7 @@ class VotesService
                 [
                     [
                         'topic' => 'votes', // todo make ENV
-                        'key'   => (string)$vote->getId(),
+                        'key'   => (string)$vote->getPost(),
                         'value' => $vote->isNegative() ? 'true' : 'false',
                     ],
                 ]
@@ -165,6 +161,8 @@ class VotesService
     }
 
     /**
+     * Delete a vote and send message to kafka
+     *
      * @param Vote $vote
      *
      * @throws ORMException
@@ -173,11 +171,23 @@ class VotesService
     public function delete(Vote $vote)
     {
         try {
+            $producer = $this->configureProducer($this->kafkaHost, $this->kafkaPort);
+
             $this->em->beginTransaction();
 
             $this->em->remove($vote);
             $this->em->flush();
             $this->em->commit();
+
+            $producer->send(
+                [
+                    [
+                        'topic' => 'votes', // todo make ENV
+                        'key'   => (string)$vote->getPost(),
+                        'value' => $vote->isNegative() ? 'true' : 'false',
+                    ],
+                ]
+            );
         } catch (Exception $e) {
             $this->em->rollback();
 
