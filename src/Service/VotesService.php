@@ -134,6 +134,15 @@ class VotesService
             if ($existingVote) {
                 $this->em->remove($existingVote);
                 $this->em->flush($existingVote);
+                $producer->send(
+                    [
+                        [
+                            'topic' => 'votes', // todo make ENV
+                            'key'   => (string)$existingVote->getPost(),
+                            'value' => $existingVote->isNegative() ? 'false' : 'true',
+                        ],
+                    ]
+                );
             }
 
             $this->em->persist($vote);
@@ -184,7 +193,7 @@ class VotesService
                     [
                         'topic' => 'votes', // todo make ENV
                         'key'   => (string)$vote->getPost(),
-                        'value' => $vote->isNegative() ? 'true' : 'false',
+                        'value' => $vote->isNegative() ? 'false' : 'true',
                     ],
                 ]
             );
