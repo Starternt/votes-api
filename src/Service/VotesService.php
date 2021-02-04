@@ -4,10 +4,16 @@ namespace App\Service;
 
 use App\Dto\UserDto;
 use App\Dto\VoteDto;
+use App\Entity\Vote;
 use App\Utils\DataMappers\VotesMapper;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\Persistence\ObjectRepository;
 use Exception;
+use Kafka\Producer;
+use Kafka\ProducerConfig;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -55,6 +61,11 @@ class VotesService
     protected $kafkaPort;
 
     /**
+     * @var ObjectRepository
+     */
+    protected $repository;
+
+    /**
      * Constructor
      *
      * @param string $kafkaHost
@@ -78,9 +89,28 @@ class VotesService
         $this->mapper = $mapper;
         $this->kafkaHost = $kafkaHost;
         $this->kafkaPort = $kafkaPort;
+        $this->repository = $em->getRepository(Vote::class);
     }
 
     /**
+     * Returns vote with specified ID
+     *
+     * @param string $id
+     *
+     * @return null|Vote
+     */
+    public function find(string $id): ?Vote
+    {
+        /** @var Vote $vote */
+        $vote = $this->repository->find($id);
+
+        return $vote;
+    }
+
+    /**
+     * Creates a vote. If user already voted for a specified post
+     * then replace that vote by a new one.
+     *
      * @param VoteDto $voteDto
      *
      * @return VoteDto
@@ -89,14 +119,14 @@ class VotesService
     public function create(VoteDto $voteDto): VoteDto
     {
         try {
-            $config = \Kafka\ProducerConfig::getInstance();
+            $config = ProducerConfig::getInstance();
             $config->setMetadataRefreshIntervalMs(100000);
             $config->setMetadataBrokerList($this->kafkaHost.':'.$this->kafkaPort);
             $config->setBrokerVersion('1.0.0');
             $config->setRequiredAck(1);
 
             $config->setIsAsyn(false);
-            $producer = new \Kafka\Producer();
+            $producer = new Producer();
 
             $this->em->beginTransaction();
 
@@ -104,6 +134,11 @@ class VotesService
             $voteDto->setCreatedBy($createdBy);
 
             $vote = $this->mapper->toEntity($voteDto);
+            $existingVote = $this->repository->findOneBy(['user' => $vote->getUser(), 'post' => $vote->getPost()]);
+            if ($existingVote) {
+                $this->em->remove($existingVote);
+                $this->em->flush($existingVote);
+            }
 
             $this->em->persist($vote);
             $this->em->flush();
@@ -123,6 +158,27 @@ class VotesService
             return $this->mapper->toDto($vote);
         } catch (Exception $e) {
             // todo add logging
+            $this->em->rollback();
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @param Vote $vote
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function delete(Vote $vote)
+    {
+        try {
+            $this->em->beginTransaction();
+
+            $this->em->remove($vote);
+            $this->em->flush();
+            $this->em->commit();
+        } catch (Exception $e) {
             $this->em->rollback();
 
             throw $e;

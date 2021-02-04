@@ -74,4 +74,30 @@ class VotesController extends JsonApiController
 
         return $this->buildContentResponse($apiRequest, $voteDto);
     }
+
+    /**
+     * Delete a vote with specified id
+     *
+     * @param Request $request
+     * @param string $id
+     *
+     * @Route("/v1/votes/{id}", methods={"DELETE"}, name="votes.delete", requirements={"id"="[0-9a-zA-z-]+"})
+     * @ApiRequest()
+     *
+     * @return Response
+     * @throws Exception
+     */
+    public function delete(Request $request, string $id): Response
+    {
+        $vote = $this->service->find($id);
+        if (null === $vote) {
+            throw $this->createNotFoundException(sprintf("Vote #%d not found", $id));
+        }
+
+        $apiRequest = $this->jsonApiService->parseRequest($request);
+
+        $this->service->delete($vote);
+
+        return $this->buildEmptyResponse($apiRequest);
+    }
 }
