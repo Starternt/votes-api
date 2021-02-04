@@ -1,4 +1,7 @@
 {
+    "amphp/amp": {
+        "version": "v1.2.2"
+    },
     "brick/math": {
         "version": "0.9.2"
     },
@@ -70,7 +73,7 @@
         "version": "1.2.1"
     },
     "doctrine/migrations": {
-        "version": "3.0.2"
+        "version": "2.3.2"
     },
     "doctrine/orm": {
         "version": "2.7.5"
@@ -113,6 +116,9 @@
     },
     "neomerx/json-api": {
         "version": "v0.8.11"
+    },
+    "nmred/kafka-php": {
+        "version": "v0.2.0.8"
     },
     "php": {
         "version": "7.4"
@@ -308,7 +314,7 @@
         "version": "v2.2.0"
     },
     "symfony/stopwatch": {
-        "version": "v5.2.2"
+        "version": "v5.2.3"
     },
     "symfony/string": {
         "version": "v5.2.2"

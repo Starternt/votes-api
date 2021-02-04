@@ -45,14 +45,28 @@ class VotesService
     protected $mapper;
 
     /**
+     * @var string
+     */
+    protected $kafkaHost;
+
+    /**
+     * @var string
+     */
+    protected $kafkaPort;
+
+    /**
      * Constructor
      *
+     * @param string $kafkaHost
+     * @param string $kafkaPort
      * @param EntityManagerInterface $em
      * @param EventDispatcherInterface $dispatcher
      * @param LoggerInterface $logger
      * @param VotesMapper $mapper
      */
     public function __construct(
+        string $kafkaHost,
+        string $kafkaPort,
         EntityManagerInterface $em,
         EventDispatcherInterface $dispatcher,
         LoggerInterface $logger,
@@ -62,6 +76,8 @@ class VotesService
         $this->dispatcher = $dispatcher;
         $this->logger = $logger;
         $this->mapper = $mapper;
+        $this->kafkaHost = $kafkaHost;
+        $this->kafkaPort = $kafkaPort;
     }
 
     /**
@@ -73,6 +89,15 @@ class VotesService
     public function create(VoteDto $voteDto): VoteDto
     {
         try {
+            $config = \Kafka\ProducerConfig::getInstance();
+            $config->setMetadataRefreshIntervalMs(100000);
+            $config->setMetadataBrokerList($this->kafkaHost.':'.$this->kafkaPort);
+            $config->setBrokerVersion('1.0.0');
+            $config->setRequiredAck(1);
+
+            $config->setIsAsyn(false);
+            $producer = new \Kafka\Producer();
+
             $this->em->beginTransaction();
 
             $createdBy = (new UserDto())->setId(Uuid::uuid4()); // TODO remove after auth realization
@@ -85,8 +110,19 @@ class VotesService
 
             $this->em->commit();
 
+            $producer->send(
+                [
+                    [
+                        'topic' => 'votes', // todo make ENV
+                        'key'   => (string)$vote->getId(),
+                        'value' => $vote->isNegative() ? 'true' : 'false',
+                    ],
+                ]
+            );
+
             return $this->mapper->toDto($vote);
         } catch (Exception $e) {
+            // todo add logging
             $this->em->rollback();
 
             throw $e;
