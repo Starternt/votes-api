@@ -79,8 +79,8 @@ class VotesService
      * @param VotesMapper $mapper
      */
     public function __construct(
-        string $kafkaHost,
-        string $kafkaPort,
+        string $kafkaHost = '',
+        string $kafkaPort = '',
         EntityManagerInterface $em,
         EventDispatcherInterface $dispatcher,
         LoggerInterface $logger,
