@@ -14,6 +14,7 @@ use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Exception;
 use Ramsey\Uuid\Uuid;
+use Symfony\Component\Security\Core\Security;
 
 /**
  * Service for posts
@@ -53,24 +54,39 @@ class VotesService
     protected $repository;
 
     /**
+     * @var Security
+     */
+    private $security;
+    /**
+     * @var string
+     */
+    private $votesTopic;
+
+    /**
      * Constructor
      *
      * @param string $kafkaHost
      * @param string $kafkaPort
+     * @param string $votesTopic
      * @param EntityManagerInterface $em
      * @param VotesMapper $mapper
+     * @param Security $security
      */
     public function __construct(
         string $kafkaHost = '',
         string $kafkaPort = '',
+        string $votesTopic = '',
         EntityManagerInterface $em,
-        VotesMapper $mapper
+        VotesMapper $mapper,
+        Security $security
     ) {
         $this->em = $em;
         $this->mapper = $mapper;
         $this->kafkaHost = $kafkaHost;
         $this->kafkaPort = $kafkaPort;
         $this->repository = $em->getRepository(Vote::class);
+        $this->security = $security;
+        $this->votesTopic = $votesTopic;
     }
 
     /**
@@ -104,10 +120,7 @@ class VotesService
 
             $this->em->beginTransaction();
 
-            $createdBy = (new UserDto())->setId(Uuid::uuid4()); // TODO remove after auth realization
-            $voteDto->setCreatedBy($createdBy);
-
-            $vote = $this->mapper->toEntity($voteDto);
+            $vote = $this->mapper->toEntity($voteDto, $this->security->getUser());
             $existingVote = $this->repository->findOneBy(['user' => $vote->getUser(), 'post' => $vote->getPost()]);
             if ($existingVote) {
                 $this->em->remove($existingVote);
@@ -115,7 +128,7 @@ class VotesService
                 $producer->send(
                     [
                         [
-                            'topic' => 'votes', // todo make ENV
+                            'topic' => $this->votesTopic,
                             'key'   => (string)$existingVote->getPost(),
                             'value' => $existingVote->isNegative() ? 'false' : 'true',
                         ],
@@ -131,7 +144,7 @@ class VotesService
             $producer->send(
                 [
                     [
-                        'topic' => 'votes', // todo make ENV
+                        'topic' => $this->votesTopic,
                         'key'   => (string)$vote->getPost(),
                         'value' => $vote->isNegative() ? 'true' : 'false',
                     ],
@@ -140,7 +153,6 @@ class VotesService
 
             return $this->mapper->toDto($vote);
         } catch (Exception $e) {
-            // todo add logging
             $this->em->rollback();
 
             throw $e;
@@ -169,7 +181,7 @@ class VotesService
             $producer->send(
                 [
                     [
-                        'topic' => 'votes', // todo make ENV
+                        'topic' => $this->votesTopic,
                         'key'   => (string)$vote->getPost(),
                         'value' => $vote->isNegative() ? 'false' : 'true',
                     ],

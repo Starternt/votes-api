@@ -5,6 +5,7 @@ namespace App\Utils\DataMappers;
 use App\Dto\PostDto;
 use App\Dto\UserDto;
 use App\Dto\VoteDto;
+use App\Entity\User;
 use App\Entity\Vote;
 use Exception;
 
@@ -20,16 +21,16 @@ class VotesMapper
      * Convert DTO to vote entity
      *
      * @param VoteDto $voteDto
+     * @param User $user
      *
      * @return Vote
-     * @throws Exception
      */
-    public function toEntity(VoteDto $voteDto): Vote
+    public function toEntity(VoteDto $voteDto, User $user): Vote
     {
         return (new Vote())
             ->setId($voteDto->getId())
             ->setPost($voteDto->getPost()->getId())
-            ->setUser($voteDto->getCreatedBy()->getId())
+            ->setUser($user)
             ->setIsNegative($voteDto->isNegative())
             ->setCreatedAt($voteDto->getCreatedAt());
     }

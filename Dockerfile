@@ -33,6 +33,7 @@ ENV APP_FILE_STORAGE=s3
 ENV LOG_OUTPUT=stream
 ENV LOG_LEVEL=WARNING
 ENV CLUSTER=production
+ENV TOPICS_VOTES_ENV=votes
 
 ENTRYPOINT ["entry-point"]
 CMD ["consul-template", "-config", "/etc/consul-template/conf.hcl", "-exec", "php-fpm"]

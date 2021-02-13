@@ -11,6 +11,7 @@ parameters:
     {{ range $idx, $node := service (printf "%s.kafka" $cluster)}}
     kafka.host: '{{ $node.Address }}'
     kafka.port: {{ $node.Port }}{{end}}
+    votes_topic: '%env(resolve:TOPICS_VOTES_ENV)%'
 
 services:
     # default configuration for services in *this* file

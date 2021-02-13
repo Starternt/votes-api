@@ -27,8 +27,9 @@ class Vote
     protected $id;
 
     /**
-     * @var string
-     * @ORM\Column(type="string", name="createdBy", length=36)
+     * @var User
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="createdBy", referencedColumnName="id")
      */
     protected $user;
 
@@ -71,19 +72,19 @@ class Vote
     }
 
     /**
-     * @return string
+     * @return User
      */
-    public function getUser(): string
+    public function getUser(): User
     {
         return $this->user;
     }
 
     /**
-     * @param string $user
+     * @param User $user
      *
      * @return Vote
      */
-    public function setUser(string $user): Vote
+    public function setUser(User $user): Vote
     {
         $this->user = $user;
 
