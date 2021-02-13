@@ -20,6 +20,7 @@ class User implements UserInterface
     const ROLE_USER = 'user';
     const STATUS_ON = 'on';
     const STATUS_OFF = 'off';
+    const STATUS_DELETED = 'deleted';
     const GENDER_UNDEFINED = 'undefined';
 
     /**
