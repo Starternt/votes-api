@@ -4,3 +4,6 @@
 
 /config/packages/doctrine.yaml
 /config/services.yaml
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###
