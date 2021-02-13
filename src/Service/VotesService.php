@@ -13,11 +13,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ObjectRepository;
 use Exception;
-use Kafka\Producer;
-use Kafka\ProducerConfig;
-use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * Service for posts
@@ -35,18 +31,6 @@ class VotesService
      * @var EntityManager
      */
     protected $em;
-
-    /**
-     * Event dispatcher
-     *
-     * @var EventDispatcherInterface
-     */
-    protected $dispatcher;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
 
     /**
      * @var VotesMapper
@@ -74,21 +58,15 @@ class VotesService
      * @param string $kafkaHost
      * @param string $kafkaPort
      * @param EntityManagerInterface $em
-     * @param EventDispatcherInterface $dispatcher
-     * @param LoggerInterface $logger
      * @param VotesMapper $mapper
      */
     public function __construct(
         string $kafkaHost = '',
         string $kafkaPort = '',
         EntityManagerInterface $em,
-        EventDispatcherInterface $dispatcher,
-        LoggerInterface $logger,
         VotesMapper $mapper
     ) {
         $this->em = $em;
-        $this->dispatcher = $dispatcher;
-        $this->logger = $logger;
         $this->mapper = $mapper;
         $this->kafkaHost = $kafkaHost;
         $this->kafkaPort = $kafkaPort;

@@ -6,7 +6,6 @@ use App\Dto\VoteDto;
 use App\Service\VotesService;
 use App\Utils\JsonApi\JsonApiErrorsTrait;
 use Exception;
-use Psr\Log\LoggerInterface;
 use Reva2\JsonApi\Annotations\ApiRequest;
 use Reva2\JsonApi\Contracts\Services\JsonApiServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,28 +23,20 @@ class VotesController extends JsonApiController
     use JsonApiErrorsTrait;
 
     /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    /**
      * @var VotesService
      */
     protected $service;
 
     /**
      * @param JsonApiServiceInterface $jsonApiService
-     * @param LoggerInterface $logger
      * @param VotesService $service
      */
     public function __construct(
         JsonApiServiceInterface $jsonApiService,
-        LoggerInterface $logger,
         VotesService $service
     ) {
         parent::__construct($jsonApiService);
 
-        $this->logger = $logger;
         $this->service = $service;
     }
 
