@@ -16,3 +16,8 @@ template {
   source = "/var/www/html/config/services.yaml.tpl"
   destination = "/var/www/html/config/services.yaml"
 }
+
+template {
+  source = "/var/www/html/config/jwt/public.pem.tpl"
+  destination = "/var/www/html/config/jwt/public.pem"
+}
